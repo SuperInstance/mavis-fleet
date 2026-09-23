@@ -123,6 +123,45 @@ def cmd_pending(args):
         print(f"  [{t['priority']}] {t['id']}: {t['goal'][:80]}")
 
 
+def cmd_chord(args):
+    """Show cross-substrate chord summary."""
+    from .chord import chord_cli_summary
+    print(chord_cli_summary())
+
+
+def cmd_promote(args):
+    """Run canon-promotion gate via the chord system."""
+    from .chord import cross_substrate_chord, promote_to_canon
+
+    # Get evidence from each substrate
+    evidence = {}
+    claim = args.claim
+
+    # Quilt: probe the claim
+    print("Gathering substrate evidence...")
+    quilt = get_substrate("quilt")
+    qresult = quilt.run({"type": "probe", "text": claim, "id": f"promote-{int(__import__('time').time())}"})
+    evidence["quilt"] = json.dumps(qresult.output)
+
+    # JEPA: trajectory prediction
+    jepa = get_substrate("jepa")
+    jresult = jepa.run({"type": "trajectory_predict", "start": claim,
+                         "id": f"promote-jepa-{int(__import__('time').time())}"})
+    evidence["jepa"] = json.dumps(jresult.output)
+
+    # JEV: probe
+    jev = get_substrate("jev")
+    vresult = jev.run({"type": "probe", "claim_a": claim, "claim_b": "alternative",
+                        "id": f"promote-jev-{int(__import__('time').time())}"})
+    evidence["jev"] = json.dumps(vresult.output)
+
+    print(f"Evidence from {len(evidence)} substrates collected")
+    result = promote_to_canon(claim, evidence,
+                              min_substrates=args.min_substrates,
+                              threshold=args.threshold)
+    print(json.dumps(result, indent=1, default=str))
+
+
 def cmd_version(args):
     """Show version and canary."""
     print(f"mavis-fleet v{__version__}")
@@ -170,6 +209,14 @@ def main():
     p_sch.set_defaults(func=cmd_schedule)
 
     sub.add_parser("pending", help="Show pending tasks").set_defaults(func=cmd_pending)
+
+    sub.add_parser("chord", help="Show cross-substrate chord summary").set_defaults(func=cmd_chord)
+    p_pr = sub.add_parser("promote", help="Promote a claim to canon via cross-substrate chord")
+    p_pr.add_argument("claim", help="The claim to evaluate")
+    p_pr.add_argument("--min-substrates", type=int, default=2)
+    p_pr.add_argument("--threshold", type=float, default=0.3)
+    p_pr.set_defaults(func=cmd_promote)
+
     sub.add_parser("version", help="Show version").set_defaults(func=cmd_version)
 
     args = p.parse_args()

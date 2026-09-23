@@ -20,6 +20,12 @@ from .agents import (
 )
 from .bus import MessageBus
 from .scheduler import Scheduler
+from .chord import (
+    substrate_polyformality_score, cross_substrate_chord,
+    promote_to_canon, null_result_ledger, compound_canon,
+    substrate_witness_chain, chord_cli_summary,
+    SUBSTRATE_VOICE_WEIGHTS,
+)
 
 
 __all__ = [
@@ -28,4 +34,7 @@ __all__ = [
     "Substrate", "SubstrateResult", "get_substrate", "list_substrates",
     "Agent", "AGENT_ROLES", "get_agent", "list_agents",
     "MessageBus", "Scheduler",
+    "substrate_polyformality_score", "cross_substrate_chord",
+    "promote_to_canon", "null_result_ledger", "compound_canon",
+    "substrate_witness_chain", "chord_cli_summary",
 ]

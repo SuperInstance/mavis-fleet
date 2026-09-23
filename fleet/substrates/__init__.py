@@ -6,6 +6,7 @@ from .jev import JEVSubstrate
 from .jepa import JEPASubstrate
 from .trainer import TrainerSubstrate
 from .rsi import RSISubstrate
+from .reconciler import Reconciler, ReconcileState, ReconcileResult
 
 
 SUBSTRATE_CLASSES = {
@@ -15,6 +16,7 @@ SUBSTRATE_CLASSES = {
     "jepa": JEPASubstrate,
     "rsi": RSISubstrate,
     "trainer": TrainerSubstrate,
+    "reconciler": Reconciler,
 }
 
 
